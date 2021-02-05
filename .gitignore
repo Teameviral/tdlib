@@ -30,3 +30,7 @@ phpdoc-*
 ._*
 .Spotlight-V100
 .Trashes
+
+# PPM
+*.ppm
+build/
