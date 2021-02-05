@@ -29,6 +29,8 @@ use PDO;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use RegexIterator;
+use VerboseAdventure\Abstracts\EventType;
+use VerboseAdventure\VerboseAdventure;
 
 class Telegram
 {
@@ -197,6 +199,11 @@ class Telegram
     protected $update_filter;
 
     /**
+     * @var VerboseAdventure
+     */
+    private VerboseAdventure $logHandler;
+
+    /**
      * Telegram constructor.
      *
      * @param string $api_key
@@ -220,6 +227,7 @@ class Telegram
 
         //Add default system commands path
         $this->addCommandsPath(TB_BASE_COMMANDS_PATH . '/SystemCommands');
+        $this->logHandler = new VerboseAdventure("tdlib");
 
         Request::initialize($this);
     }
@@ -1259,6 +1267,14 @@ class Telegram
     public function getLastUpdateId(): int
     {
         return $this->last_update_id;
+    }
+
+    /**
+     * @return VerboseAdventure
+     */
+    public function getLogHandler(): VerboseAdventure
+    {
+        return $this->logHandler;
     }
 
     /**
