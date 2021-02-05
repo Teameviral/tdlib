@@ -14,6 +14,8 @@ use Longman\TelegramBot\Exception\TelegramLogException;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
+use VerboseAdventure\Abstracts\EventType;
+use VerboseAdventure\VerboseAdventure;
 
 class TelegramLog
 {
@@ -30,6 +32,13 @@ class TelegramLog
      * @var \Monolog\Logger
      */
     protected static $monolog_update;
+
+    /**
+     * VerboseAdventure instance
+     *
+     * @var VerboseAdventure
+     */
+    protected static $verbose_adventure;
 
     /**
      * Path for error log
@@ -68,6 +77,7 @@ class TelegramLog
      */
     public static function initialize(Logger $external_monolog = null)
     {
+        self::$verbose_adventure = new VerboseAdventure("tdlib");
         if (self::$monolog === null) {
             if ($external_monolog !== null) {
                 self::$monolog = $external_monolog;
@@ -234,6 +244,7 @@ class TelegramLog
      */
     public static function error($text)
     {
+        self::$verbose_adventure->log(EventType::ERROR, $text, "lib");
         if (self::isErrorLogActive()) {
             $text = self::getLogText($text, func_get_args());
             self::$monolog->error($text);
@@ -247,6 +258,7 @@ class TelegramLog
      */
     public static function debug($text)
     {
+        self::$verbose_adventure->log(EventType::VERBOSE, $text, "lib");
         if (self::isDebugLogActive()) {
             $text = self::getLogText($text, func_get_args());
             self::$monolog->debug($text);
@@ -260,6 +272,7 @@ class TelegramLog
      */
     public static function update($text)
     {
+        self::$verbose_adventure->log(EventType::INFO, $text, "lib");
         if (self::isUpdateLogActive()) {
             $text = self::getLogText($text, func_get_args());
             self::$monolog_update->info($text);
