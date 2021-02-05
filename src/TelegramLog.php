@@ -13,6 +13,8 @@ namespace Longman\TelegramBot;
 
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
+use VerboseAdventure\Abstracts\EventType;
+use VerboseAdventure\VerboseAdventure;
 
 /**
  * Class TelegramLog
@@ -35,6 +37,13 @@ class TelegramLog
      * @var LoggerInterface
      */
     protected static $logger;
+
+    /**
+     * VerboseAdventure instance
+     *
+     * @var VerboseAdventure
+     */
+    protected static $verbose_adventure;
 
     /**
      * Logger instance for update
@@ -64,6 +73,8 @@ class TelegramLog
      */
     public static $remove_bot_token = true;
 
+
+
     /**
      * Initialise logging.
      *
@@ -72,6 +83,7 @@ class TelegramLog
      */
     public static function initialize(LoggerInterface $logger = null, LoggerInterface $update_logger = null): void
     {
+        self::$verbose_adventure = new VerboseAdventure("tdlib");
         self::$logger        = $logger ?: new NullLogger();
         self::$update_logger = $update_logger ?: new NullLogger();
     }
@@ -121,6 +133,36 @@ class TelegramLog
     {
         // Get the correct logger instance.
         $logger = null;
+        // Set VerboseAdventure log level
+        $vlevel = EventType::UNKNOWN;
+        if (in_array($name, ['emergency', 'alert', 'critical', 'error'], true))
+        {
+            $vlevel = EventType::ERROR;
+        }
+        else if ($name === 'warning')
+        {
+            $vlevel = EventType::WARNING;
+        }
+        else if (in_array($name, ['notice', 'info'], true))
+        {
+            $vlevel = EventType::INFO;
+        }
+        else if ($name === 'debug')
+        {
+            $vlevel = EventType::VERBOSE;
+        }
+
+        // Replace any placeholders from the passed context.
+        if (count($arguments) >= 2) {
+            $arguments[0] = self::interpolate($arguments[0], $arguments[1]);
+        }
+
+        if (self::$verbose_adventure == null)
+            self::$verbose_adventure = new VerboseAdventure("tdlib");
+
+        // Log to VerboseAdventure
+        self::$verbose_adventure->log($vlevel, $arguments[0]);
+
         if (in_array($name, ['emergency', 'alert', 'critical', 'error', 'warning', 'notice', 'info', 'debug',], true)) {
             $logger = self::$logger;
         } elseif ($name === 'update') {
@@ -131,11 +173,6 @@ class TelegramLog
         // Clearly we have no logging enabled.
         if ($logger === null) {
             return;
-        }
-
-        // Replace any placeholders from the passed context.
-        if (count($arguments) >= 2) {
-            $arguments[0] = self::interpolate($arguments[0], $arguments[1]);
         }
 
         call_user_func_array([$logger, $name], $arguments);
