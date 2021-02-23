@@ -45,29 +45,28 @@ class InlineKeyboardButton extends KeyboardButton
      */
     public static function couldBe($data)
     {
-        return is_array($data) &&
-               array_key_exists('text', $data) && (
-                   array_key_exists('url', $data) ||
-                   array_key_exists('callback_data', $data) ||
-                   array_key_exists('switch_inline_query', $data) ||
-                   array_key_exists('switch_inline_query_current_chat', $data) ||
-                   array_key_exists('callback_game', $data) ||
-                   array_key_exists('pay', $data)
-               );
+        return array_key_exists('text', $data) && (
+                array_key_exists('url', $data) ||
+                array_key_exists('login_url', $data) ||
+                array_key_exists('callback_data', $data) ||
+                array_key_exists('switch_inline_query', $data) ||
+                array_key_exists('switch_inline_query_current_chat', $data) ||
+                array_key_exists('callback_game', $data) ||
+                array_key_exists('pay', $data)
+            );
     }
 
     /**
      * {@inheritdoc}
      */
     protected function validate()
-    {
-        if ($this->getProperty('text', '') === '') {
-            throw new TelegramException('You must add some text to the button!');
-        }
+    {if ($this->getProperty('text', '') === '') {
+        throw new TelegramException('You must add some text to the button!');
+    }
 
         $num_params = 0;
 
-        foreach (['url', 'callback_data', 'callback_game', 'pay'] as $param) {
+        foreach (['url', 'login_url', 'callback_data', 'callback_game', 'pay'] as $param) {
             if ($this->getProperty($param, '') !== '') {
                 $num_params++;
             }
@@ -80,7 +79,7 @@ class InlineKeyboardButton extends KeyboardButton
         }
 
         if ($num_params !== 1) {
-            throw new TelegramException('You must use only one of these fields: url, callback_data, switch_inline_query, switch_inline_query_current_chat, callback_game, pay!');
+            throw new TelegramException('You must use only one of these fields: url, login_url, callback_data, switch_inline_query, switch_inline_query_current_chat, callback_game, pay!');
         }
     }
 
@@ -90,8 +89,8 @@ class InlineKeyboardButton extends KeyboardButton
     public function __call($method, $args)
     {
         // Only 1 of these can be set, so clear the others when setting a new one.
-        if (in_array($method, ['setUrl', 'setCallbackData', 'setSwitchInlineQuery', 'setSwitchInlineQueryCurrentChat', 'setCallbackGame', 'setPay'], true)) {
-            unset($this->url, $this->callback_data, $this->switch_inline_query, $this->switch_inline_query_current_chat, $this->callback_game, $this->pay);
+        if (in_array($method, ['setUrl', 'setLoginUrl', 'setCallbackData', 'setSwitchInlineQuery', 'setSwitchInlineQueryCurrentChat', 'setCallbackGame', 'setPay'], true)) {
+            unset($this->url, $this->login_url, $this->callback_data, $this->switch_inline_query, $this->switch_inline_query_current_chat, $this->callback_game, $this->pay);
         }
 
         return parent::__call($method, $args);

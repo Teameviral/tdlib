@@ -2,7 +2,7 @@
     "package": {
         "package_name": "net.intellivoid.tdlib",
         "name": "Telegram Database Library for Bots",
-        "version": "1.0.0.0",
+        "version": "1.0.0.1",
         "author": "Zi Xing Narrakas",
         "organization": "Intellivoid Technologies",
         "description": "Allows bot clients to communicate with the Telegram Bot API server",
@@ -573,6 +573,10 @@
         },
         {
             "required": true,
+            "file": "Entities/LoginUrl.php"
+        },
+        {
+            "required": true,
             "file": "Entities/Poll.php"
         },
         {
@@ -596,5 +600,7 @@
             "file": "Conversation.php"
         }
     ],
-    "files": []
+    "files": [
+        "package.json"
+    ]
 }
