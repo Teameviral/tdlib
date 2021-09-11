@@ -864,6 +864,10 @@ class DB
      */
     public static function insertMessageRequest(Message $message)
     {
+        // The bots don't require this table for anything and it causes high db load.
+        // Just return that the insert failed and let the fail code handle it - Justasic
+        return false;
+
         if (!self::isDbConnected()) {
             return false;
         }
