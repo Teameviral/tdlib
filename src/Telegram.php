@@ -585,9 +585,10 @@ class Telegram
         }
 
         //Make sure we don't try to process update that was already processed
-        $last_id = DB::selectTelegramUpdate(1, $this->update->getUpdateId());
+        $this_id = $this->update->getUpdateId();
+        $last_id = DB::selectTelegramUpdate(1, $this_id);
         if ($last_id && count($last_id) === 1) {
-            TelegramLog::debug('Duplicate update received, processing aborted!');
+            TelegramLog::debug("Duplicate update received ($this_id == $last_id), processing aborted!");
             return Request::emptyResponse();
         }
 

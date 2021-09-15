@@ -215,6 +215,17 @@ class DB
                 $redis->expire('telegram_update_ids', 86400);
             }
 
+            // If the limit is 1 and $id is not null, just return for now
+            // TODO: maybe make this more reasonable?
+            if ($id !== null && $limit === 1)
+            {
+                $info = $redis->get($id);
+                if ($info !== null)
+                    return json_decode($info);
+                else
+                    return false;
+            }
+
             // Select the most recent $limit keys from the set.
             $updates = $redis->lRange('telegram_update_ids', 0, $limit);
 
@@ -226,9 +237,7 @@ class DB
                 $ret[$update] = json_decode($redis->get($update));
             }
 
-            // FIXME: use the $id param somehow??
-
-            return $ret;
+            return count($ret) != 0 ? $ret : false;
         }
         else
         {
