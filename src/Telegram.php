@@ -26,6 +26,7 @@ use Longman\TelegramBot\Entities\Update;
 use Longman\TelegramBot\Entities\User;
 use Longman\TelegramBot\Exception\TelegramException;
 use PDO;
+use Redis;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use RegexIterator;
@@ -204,6 +205,13 @@ class Telegram
     private VerboseAdventure $logHandler;
 
     /**
+     * Redis database handle
+     * 
+     * @var $redis_client;
+     */
+    protected $redis_client = null;
+
+    /**
      * Telegram constructor.
      *
      * @param string $api_key
@@ -230,6 +238,24 @@ class Telegram
         $this->logHandler = new VerboseAdventure("tdlib");
 
         Request::initialize($this);
+    }
+
+    /**
+     * Initializes a Redis connection
+     * 
+     */
+    public function enableRedis($redis_host, int $redis_port = 6379, int $redis_database = 0, $redis_username = null, $redis_password = null)
+    {
+        $this->redis_client = new Redis();
+        $this->redis_client->pconnect($redis_host, $redis_port);
+        if ($redis_username !== null || $redis_password !== null)
+        {
+            $this->getLogHandler()->log(EventType::VERBOSE, "Redis: Using username/password authentication...");
+            $this->redis_client->auth([$redis_username, $redis_password]);
+        }
+
+        // select the database used.
+        $this->redis_client->select($redis_database);
     }
 
     /**
@@ -1267,5 +1293,15 @@ class Telegram
     public function getUpdateFilter(): ?callable
     {
         return $this->update_filter;
+    }
+
+    /**
+     * Returns the redis client
+     * 
+     * @return RedisClient
+     */
+    public function getRedis()
+    {
+        return $this->redis_client;
     }
 }
