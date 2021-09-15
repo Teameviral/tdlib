@@ -25,6 +25,7 @@ use Longman\TelegramBot\Entities\User;
 use Longman\TelegramBot\Exception\TelegramException;
 use PDO;
 use PDOException;
+use Redis;
 
 class DB
 {
@@ -188,42 +189,84 @@ class DB
      * @return array|bool Fetched data or false if not connected
      * @throws TelegramException
      */
-    public static function selectTelegramUpdate($limit = null, $id = null)
+    public static function selectTelegramUpdate($limit = -1, $id = null)
     {
-        if (!self::isDbConnected()) {
-            return false;
+        // Try to use redis first, then use SQL - Justasic
+        if (self::$telegram->getRedis() !== null)
+        {
+            $redis = self::$telegram->getRedis();
+            // Rebuild the ID cache if it doesn't exist
+            if ($redis->exists('telegram_update_ids') != true)
+            {
+                // Set the update id cache up again from existing keys
+                $keys = $redis->keys("*");
+                foreach ($keys as $key)
+                {
+                    if (is_numeric($key))
+                    {
+                        $redis->lPush('telegram_update_ids', $key);
+                    }
+                }
+
+                // Sort the keys
+                $redis->sort('telegram_update_ids');
+
+                // Expire this set in 1 day
+                $redis->expire('telegram_update_ids', 86400);
+            }
+
+            // Select the most recent $limit keys from the set.
+            $updates = $redis->lRange('telegram_update_ids', 0, $limit);
+
+            $ret = array();
+
+            // Now get all the individual updates
+            foreach ($updates as $update)
+            {
+                $ret[$update] = json_decode($redis->get($update));
+            }
+
+            // FIXME: use the $id param somehow??
+
+            return $ret;
         }
-
-        try {
-            $sql = '
-                SELECT `id`
-                FROM `' . TB_TELEGRAM_UPDATE . '`
-            ';
-
-            if ($id !== null) {
-                $sql .= ' WHERE `id` = :id';
-            } else {
-                $sql .= ' ORDER BY `id` DESC';
+        else
+        {
+            if (!self::isDbConnected()) {
+                return false;
             }
 
-            if ($limit !== null) {
-                $sql .= ' LIMIT :limit';
+            try {
+                $sql = '
+                    SELECT `id`
+                    FROM `' . TB_TELEGRAM_UPDATE . '`
+                ';
+
+                if ($id !== null) {
+                    $sql .= ' WHERE `id` = :id';
+                } else {
+                    $sql .= ' ORDER BY `id` DESC';
+                }
+
+                if ($limit !== null) {
+                    $sql .= ' LIMIT :limit';
+                }
+
+                $sth = self::$pdo->prepare($sql);
+
+                if ($limit !== null) {
+                    $sth->bindValue(':limit', $limit, PDO::PARAM_INT);
+                }
+                if ($id !== null) {
+                    $sth->bindValue(':id', $id);
+                }
+
+                $sth->execute();
+
+                return $sth->fetchAll(PDO::FETCH_ASSOC);
+            } catch (PDOException $e) {
+                throw new TelegramException($e->getMessage());
             }
-
-            $sth = self::$pdo->prepare($sql);
-
-            if ($limit !== null) {
-                $sth->bindValue(':limit', $limit, PDO::PARAM_INT);
-            }
-            if ($id !== null) {
-                $sth->bindValue(':id', $id);
-            }
-
-            $sth->execute();
-
-            return $sth->fetchAll(PDO::FETCH_ASSOC);
-        } catch (PDOException $e) {
-            throw new TelegramException($e->getMessage());
         }
     }
 
@@ -339,34 +382,92 @@ class DB
             throw new TelegramException('message_id, edited_message_id, channel_post_id, edited_channel_post_id, inline_query_id, chosen_inline_result_id, callback_query_id, shipping_query_id, pre_checkout_query_id, poll_id are all null');
         }
 
-        if (!self::isDbConnected()) {
-            return false;
+        if (self::$telegram->getRedis() !== null)
+        {
+            $data = array(
+                "id"                      => $update_id,
+                "chat_id"                 => $chat_id,
+                "message_id"              => $message_id,
+                "edited_message_id"       => $edited_message_id,
+                "channel_post_id"         => $channel_post_id,
+                "edited_channel_post_id"  => $edited_channel_post_id,
+                "inline_query_id"         => $inline_query_id,
+                "chosen_inline_result_id" => $chosen_inline_result_id,
+                "callback_query_id"       => $callback_query_id,
+                "shipping_query_id"       => $shipping_query_id,
+                "pre_checkout_query_id"   => $pre_checkout_query_id,
+                "poll_id"                 => $poll_id
+            );
+
+            $data_json = json_encode($data);
+
+            // Because this library requires that we return a quantity of IDs at random
+            // I had to accommodate the SQL `LIMIT` feature in this manner by using the
+            // `telegram_update_ids` set in the redis db. This set expires after a day
+            // and will be rebuilt upon the next insert. - Justasic
+
+            $redis = self::$telegram->getRedis();
+            // Set the expiry for the update ids set, will have to also recreate it.
+            if ($redis->exists('telegram_update_ids') != true)
+            {
+                // Set the update id cache up again from existing keys
+                $keys = $redis->keys("*");
+                foreach ($keys as $key)
+                {
+                    if (is_numeric($key))
+                    {
+                        $redis->lPush('telegram_update_ids', $key);
+                    }
+                }
+
+                // Add the update ID to a set
+                $redis->lPush('telegram_update_ids', $update_id);
+
+                // Expire this set in 1 day
+                $redis->expire('telegram_update_ids', 86400);
+            }
+            else
+            {
+                // Add the update ID to a set
+                $redis->lPush('telegram_update_ids', $update_id);
+            }
+            
+            // Sort the set now instead of later.
+            $redis->sort('telegram_update_ids');
+            // Actually add the update to redis
+            return $redis->setEx($update_id, 900, $data_json);
         }
+        else
+        {
+            if (!self::isDbConnected()) {
+                return false;
+            }
 
-        try {
-            $sth = self::$pdo->prepare('
-                INSERT IGNORE INTO `' . TB_TELEGRAM_UPDATE . '`
-                (`id`, `chat_id`, `message_id`, `edited_message_id`, `channel_post_id`, `edited_channel_post_id`, `inline_query_id`, `chosen_inline_result_id`, `callback_query_id`, `shipping_query_id`, `pre_checkout_query_id`, `poll_id`)
-                VALUES
-                (:id, :chat_id, :message_id, :edited_message_id, :channel_post_id, :edited_channel_post_id, :inline_query_id, :chosen_inline_result_id, :callback_query_id, :shipping_query_id, :pre_checkout_query_id, :poll_id)
-            ');
+            try {
+                $sth = self::$pdo->prepare('
+                    INSERT IGNORE INTO `' . TB_TELEGRAM_UPDATE . '`
+                    (`id`, `chat_id`, `message_id`, `edited_message_id`, `channel_post_id`, `edited_channel_post_id`, `inline_query_id`, `chosen_inline_result_id`, `callback_query_id`, `shipping_query_id`, `pre_checkout_query_id`, `poll_id`)
+                    VALUES
+                    (:id, :chat_id, :message_id, :edited_message_id, :channel_post_id, :edited_channel_post_id, :inline_query_id, :chosen_inline_result_id, :callback_query_id, :shipping_query_id, :pre_checkout_query_id, :poll_id)
+                ');
 
-            $sth->bindValue(':id', $update_id);
-            $sth->bindValue(':chat_id', $chat_id);
-            $sth->bindValue(':message_id', $message_id);
-            $sth->bindValue(':edited_message_id', $edited_message_id);
-            $sth->bindValue(':channel_post_id', $channel_post_id);
-            $sth->bindValue(':edited_channel_post_id', $edited_channel_post_id);
-            $sth->bindValue(':inline_query_id', $inline_query_id);
-            $sth->bindValue(':chosen_inline_result_id', $chosen_inline_result_id);
-            $sth->bindValue(':callback_query_id', $callback_query_id);
-            $sth->bindValue(':shipping_query_id', $shipping_query_id);
-            $sth->bindValue(':pre_checkout_query_id', $pre_checkout_query_id);
-            $sth->bindValue(':poll_id', $poll_id);
+                $sth->bindValue(':id', $update_id);
+                $sth->bindValue(':chat_id', $chat_id);
+                $sth->bindValue(':message_id', $message_id);
+                $sth->bindValue(':edited_message_id', $edited_message_id);
+                $sth->bindValue(':channel_post_id', $channel_post_id);
+                $sth->bindValue(':edited_channel_post_id', $edited_channel_post_id);
+                $sth->bindValue(':inline_query_id', $inline_query_id);
+                $sth->bindValue(':chosen_inline_result_id', $chosen_inline_result_id);
+                $sth->bindValue(':callback_query_id', $callback_query_id);
+                $sth->bindValue(':shipping_query_id', $shipping_query_id);
+                $sth->bindValue(':pre_checkout_query_id', $pre_checkout_query_id);
+                $sth->bindValue(':poll_id', $poll_id);
 
-            return $sth->execute();
-        } catch (PDOException $e) {
-            throw new TelegramException($e->getMessage());
+                return $sth->execute();
+            } catch (PDOException $e) {
+                throw new TelegramException($e->getMessage());
+            }
         }
     }
 
