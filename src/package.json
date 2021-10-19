@@ -1,0 +1,670 @@
+{
+    "package": {
+        "package_name": "net.intellivoid.tdlib",
+        "name": "Telegram Database Library for Bots",
+        "version": "1.0.1.0",
+        "author": "Zi Xing Narrakas",
+        "organization": "Intellivoid Technologies",
+        "description": "Allows bot clients to communicate with the Telegram Bot API server",
+        "url": "https://github.com/intellivoid/tdlib",
+        "dependencies": [
+            {
+                "package": "net.intellivoid.background_worker",
+                "version": "latest",
+                "source": "default@github/intellivoid/BackgroundWorker",
+                "required": true
+            },
+            {
+                "package": "net.intellivoid.verbose_adventure",
+                "version": "latest",
+                "source": "default@github/intellivoid/VerboseAdventure",
+                "required": true
+            },
+            {
+                "package": "com.guzzlehttp.guzzle",
+                "version": "latest",
+                "source": "guzzlehttp@composer/guzzle",
+                "required": true
+            },
+            {
+                "package": "com.guzzlehttp.guzzle",
+                "version": "latest",
+                "source": "guzzlehttp@composer/guzzle",
+                "required": true
+            },
+            {
+                "package": "com.monolog.monolog",
+                "version": "latest",
+                "source": "monolog@composer/monolog",
+                "required": true
+            }
+        ],
+        "configuration": {
+            "autoload_method": "generated_spl",
+            "main": null,
+            "post_installation": [],
+            "pre_installation": []
+        }
+    },
+    "components": [
+        {
+            "required": true,
+            "file": "ChatAction.php"
+        },
+        {
+            "required": true,
+            "file": "Commands/AdminCommand.php"
+        },
+        {
+            "required": true,
+            "file": "Commands/AdminCommands/ChatsCommand.php"
+        },
+        {
+            "required": true,
+            "file": "Commands/AdminCommands/CleanupCommand.php"
+        },
+        {
+            "required": true,
+            "file": "Commands/AdminCommands/DebugCommand.php"
+        },
+        {
+            "required": true,
+            "file": "Commands/AdminCommands/SendtoallCommand.php"
+        },
+        {
+            "required": true,
+            "file": "Commands/AdminCommands/SendtochannelCommand.php"
+        },
+        {
+            "required": true,
+            "file": "Commands/AdminCommands/WhoisCommand.php"
+        },
+        {
+            "required": true,
+            "file": "Commands/Command.php"
+        },
+        {
+            "required": true,
+            "file": "Commands/SystemCommand.php"
+        },
+        {
+            "required": true,
+            "file": "Commands/SystemCommands/CallbackqueryCommand.php"
+        },
+        {
+            "required": true,
+            "file": "Commands/SystemCommands/GenericCommand.php"
+        },
+        {
+            "required": true,
+            "file": "Commands/SystemCommands/GenericmessageCommand.php"
+        },
+        {
+            "required": true,
+            "file": "Commands/SystemCommands/InlinequeryCommand.php"
+        },
+        {
+            "required": true,
+            "file": "Commands/UserCommand.php"
+        },
+        {
+            "required": true,
+            "file": "Commands/UserCommands/StartCommand.php"
+        },
+        {
+            "required": true,
+            "file": "Conversation.php"
+        },
+        {
+            "required": true,
+            "file": "ConversationDB.php"
+        },
+        {
+            "required": true,
+            "file": "DB.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/Animation.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/Audio.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/BotCommand.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/BotCommandScope/BotCommandScope.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/BotCommandScope/BotCommandScopeAllChatAdministrators.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/BotCommandScope/BotCommandScopeAllGroupChats.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/BotCommandScope/BotCommandScopeAllPrivateChats.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/BotCommandScope/BotCommandScopeChat.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/BotCommandScope/BotCommandScopeChatAdministrators.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/BotCommandScope/BotCommandScopeChatMember.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/BotCommandScope/BotCommandScopeDefault.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/CallbackQuery.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/ChannelPost.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/Chat.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/ChatInviteLink.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/ChatLocation.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/ChatMember/ChatMember.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/ChatMember/ChatMemberAdministrator.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/ChatMember/ChatMemberBanned.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/ChatMember/ChatMemberLeft.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/ChatMember/ChatMemberMember.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/ChatMember/ChatMemberNotImplemented.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/ChatMember/ChatMemberOwner.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/ChatMember/ChatMemberRestricted.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/ChatMember/Factory.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/ChatMemberUpdated.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/ChatPermissions.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/ChatPhoto.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/ChosenInlineResult.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/Contact.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/Dice.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/Document.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/EditedChannelPost.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/EditedMessage.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/Entity.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/Factory.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/File.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/Games/CallbackGame.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/Games/Game.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/Games/GameHighScore.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/InlineKeyboard.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/InlineKeyboardButton.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/InlineQuery.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/InlineQuery/InlineEntity.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/InlineQuery/InlineQueryResult.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/InlineQuery/InlineQueryResultArticle.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/InlineQuery/InlineQueryResultAudio.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/InlineQuery/InlineQueryResultCachedAudio.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/InlineQuery/InlineQueryResultCachedDocument.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/InlineQuery/InlineQueryResultCachedGif.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/InlineQuery/InlineQueryResultCachedMpeg4Gif.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/InlineQuery/InlineQueryResultCachedPhoto.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/InlineQuery/InlineQueryResultCachedSticker.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/InlineQuery/InlineQueryResultCachedVideo.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/InlineQuery/InlineQueryResultCachedVoice.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/InlineQuery/InlineQueryResultContact.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/InlineQuery/InlineQueryResultDocument.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/InlineQuery/InlineQueryResultGame.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/InlineQuery/InlineQueryResultGif.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/InlineQuery/InlineQueryResultLocation.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/InlineQuery/InlineQueryResultMpeg4Gif.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/InlineQuery/InlineQueryResultPhoto.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/InlineQuery/InlineQueryResultVenue.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/InlineQuery/InlineQueryResultVideo.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/InlineQuery/InlineQueryResultVoice.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/InputMedia/InputMedia.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/InputMedia/InputMediaAnimation.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/InputMedia/InputMediaAudio.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/InputMedia/InputMediaDocument.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/InputMedia/InputMediaPhoto.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/InputMedia/InputMediaVideo.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/InputMessageContent/InputContactMessageContent.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/InputMessageContent/InputInvoiceMessageContent.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/InputMessageContent/InputLocationMessageContent.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/InputMessageContent/InputMessageContent.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/InputMessageContent/InputTextMessageContent.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/InputMessageContent/InputVenueMessageContent.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/Keyboard.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/KeyboardButton.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/KeyboardButtonPollType.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/Location.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/LoginUrl.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/MaskPosition.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/Message.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/MessageAutoDeleteTimerChanged.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/MessageEntity.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/Payments/Invoice.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/Payments/LabeledPrice.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/Payments/OrderInfo.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/Payments/PreCheckoutQuery.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/Payments/ShippingAddress.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/Payments/ShippingOption.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/Payments/ShippingQuery.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/Payments/SuccessfulPayment.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/PhotoSize.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/Poll.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/PollAnswer.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/PollOption.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/ProximityAlertTriggered.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/ReplyToMessage.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/ServerResponse.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/Sticker.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/StickerSet.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/TelegramPassport/EncryptedCredentials.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/TelegramPassport/EncryptedPassportElement.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/TelegramPassport/PassportData.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/TelegramPassport/PassportElementError/PassportElementError.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/TelegramPassport/PassportElementError/PassportElementErrorDataField.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/TelegramPassport/PassportElementError/PassportElementErrorFile.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/TelegramPassport/PassportElementError/PassportElementErrorFiles.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/TelegramPassport/PassportElementError/PassportElementErrorFrontSide.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/TelegramPassport/PassportElementError/PassportElementErrorReverseSide.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/TelegramPassport/PassportElementError/PassportElementErrorSelfie.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/TelegramPassport/PassportElementError/PassportElementErrorTranslationFile.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/TelegramPassport/PassportElementError/PassportElementErrorTranslationFiles.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/TelegramPassport/PassportElementError/PassportElementErrorUnspecified.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/TelegramPassport/PassportFile.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/Update.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/User.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/UserProfilePhotos.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/Venue.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/Video.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/VideoNote.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/Voice.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/VoiceChatEnded.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/VoiceChatParticipantsInvited.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/VoiceChatScheduled.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/VoiceChatStarted.php"
+        },
+        {
+            "required": true,
+            "file": "Entities/WebhookInfo.php"
+        },
+        {
+            "required": true,
+            "file": "Exception/InvalidBotTokenException.php"
+        },
+        {
+            "required": true,
+            "file": "Exception/TelegramException.php"
+        },
+        {
+            "required": true,
+            "file": "Exception/TelegramLogException.php"
+        },
+        {
+            "required": true,
+            "file": "Request.php"
+        },
+        {
+            "required": true,
+            "file": "Telegram.php"
+        },
+        {
+            "required": true,
+            "file": "TelegramLog.php"
+        }
+    ],
+    "files": [
+        "package.json"
+    ]
+}
