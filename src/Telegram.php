@@ -206,6 +206,13 @@ class Telegram
     private VerboseAdventure $logHandler;
 
     /**
+     * Connect to test servers instead of production servers
+     * 
+     * @var bool
+     */
+    protected $testServers = false;
+
+    /**
      * Redis database handle
      * 
      * @var $redis_client;
@@ -220,7 +227,7 @@ class Telegram
      *
      * @throws TelegramException
      */
-    public function __construct(string $api_key, string $bot_username = '')
+    public function __construct(string $api_key, string $bot_username = '', bool $test_servers = false)
     {
         if (empty($api_key)) {
             throw new TelegramException('API KEY not defined!');
@@ -233,6 +240,8 @@ class Telegram
         $this->api_key = $api_key;
 
         $this->bot_username = $bot_username;
+
+        $this->testServers = $test_servers;
 
         //Add default system commands path
         $this->addCommandsPath(TB_BASE_COMMANDS_PATH . '/SystemCommands');
@@ -1410,5 +1419,15 @@ class Telegram
     public function getRedis()
     {
         return $this->redis_client;
+    }
+
+    /**
+     * Returns whether or not the bot is connecting to the test servers or not
+     * 
+     * @return bool
+     */
+    public function getTestServer()
+    {
+        return $this->testServers;
     }
 }
