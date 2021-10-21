@@ -14,6 +14,7 @@ namespace Longman\TelegramBot;
 defined('TB_BASE_PATH') || define('TB_BASE_PATH', __DIR__);
 defined('TB_BASE_COMMANDS_PATH') || define('TB_BASE_COMMANDS_PATH', TB_BASE_PATH . '/Commands');
 
+use BackgroundWorker\BackgroundWorker;
 use Exception;
 use InvalidArgumentException;
 use Longman\TelegramBot\Commands\AdminCommand;
@@ -558,6 +559,79 @@ class Telegram
                 Request::getUpdates(compact('offset', 'limit', 'timeout', 'allowed_updates'));
             }
         }
+
+        return $response;
+    }
+
+    /**
+     * Passes the updates to be processed in the background by the Background Worker
+     *
+     * @param BackgroundWorker $backgroundWorker
+     * @param null $limit
+     * @param null $timeout
+     * @return ServerResponse
+     * @throws TelegramException
+     */
+    public function handleBackgroundUpdates(BackgroundWorker $backgroundWorker, $limit = null, $timeout = null)
+    {
+        if (empty($this->bot_username)) {
+            throw new TelegramException('Bot Username is not defined!');
+        }
+
+        $offset = 0;
+
+        //Take custom input into account.
+        if ($custom_input = $this->getCustomInput())
+        {
+            $this->getLogHandler()->log(EventType::VERBOSE, "Executing Custom Input");
+            $response = new ServerResponse(json_decode($custom_input, true), $this->bot_username);
+        }
+        else
+        {
+            if ($this->last_update_id !== null) {
+                $offset = $this->last_update_id + 1;    //As explained in the telegram bot API documentation
+            }
+
+            $this->getLogHandler()->log(EventType::VERBOSE, "Fetching from offset '$offset'");
+
+
+            $response = Request::getUpdates(
+                [
+                    'offset'  => $offset,
+                    'limit'   => $limit,
+                    'timeout' => $timeout,
+                ]
+            );
+        }
+
+        $this->getLogHandler()->log(EventType::VERBOSE, "Updates fetched OK");
+
+        if ($response->isOk()) {
+
+            $this->getLogHandler()->log(EventType::VERBOSE, "Response OK, pushing to workers");
+
+            $results = $response->getResult();
+
+            /** @var Update $latest_update */
+            if(count($results) > 0)
+            {
+                $latest_update = $results[(count($results) - 1)];
+                $this->last_update_id = $latest_update->getUpdateId();
+                $this->getLogHandler()->log(EventType::VERBOSE, "Setting offset '" . $this->last_update_id . "'");
+
+            }
+        }
+        else
+        {
+            $this->getLogHandler()->log(EventType::WARNING, "Response NOT OK, pushing to workers");
+        }
+
+        // Send the updates to be processed in the background by a worker immediately
+        $backgroundWorker->getClient()->getGearmanClient()->doBackground(
+            $this->bot_username . "_updates",  $response->toJson()
+        );
+
+        $this->getLogHandler()->log(EventType::VERBOSE, "OK, Job pushed to workers.");
 
         return $response;
     }
