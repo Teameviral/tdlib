@@ -515,7 +515,7 @@ class Request
 
         try {
             $response = self::$client->post(
-                '/bot' . self::$telegram->getApiKey() . '/' . $action,
+                '/bot' . self::$telegram->getApiKey() . '/' . (self::$telegram->getTestServer() ? "test/" : "") . $action,
                 $request_params
             );
             $result   = (string) $response->getBody();
