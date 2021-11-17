@@ -207,24 +207,31 @@ class Telegram
 
     /**
      * Connect to test servers instead of production servers
-     * 
+     *
      * @var bool
      */
     protected $testServers = false;
 
     /**
      * Redis database handle
-     * 
+     *
      * @var $redis_client;
      */
     protected $redis_client = null;
+
+    /**
+     * Indicates if verbose logging is enabled for VerboseAdventure
+     *
+     * @var bool
+     */
+    private $verbose_logging = false;
 
     /**
      * Telegram constructor.
      *
      * @param string $api_key
      * @param string $bot_username
-     *
+     * @param bool $test_servers
      * @throws TelegramException
      */
     public function __construct(string $api_key, string $bot_username = '', bool $test_servers = false)
@@ -245,14 +252,14 @@ class Telegram
 
         //Add default system commands path
         $this->addCommandsPath(TB_BASE_COMMANDS_PATH . '/SystemCommands');
-        $this->logHandler = new VerboseAdventure("tdlib");
+        $this->logHandler = new VerboseAdventure('tdlib');
 
         Request::initialize($this);
     }
 
     /**
      * Initializes a Redis connection
-     * 
+     *
      */
     public function enableRedis($redis_host, int $redis_port = 6379, int $redis_database = 0, $redis_username = null, $redis_password = null)
     {
@@ -260,7 +267,8 @@ class Telegram
         $this->redis_client->pconnect($redis_host, $redis_port);
         if ($redis_username !== null || $redis_password !== null)
         {
-            $this->getLogHandler()->log(EventType::VERBOSE, "Redis: Using username/password authentication...");
+            if($this->isVerboseLogging())
+                $this->getLogHandler()->log(EventType::VERBOSE, "Redis: Using username/password authentication...");
             $this->redis_client->auth([$redis_username, $redis_password]);
         }
 
@@ -592,7 +600,8 @@ class Telegram
         //Take custom input into account.
         if ($custom_input = $this->getCustomInput())
         {
-            $this->getLogHandler()->log(EventType::VERBOSE, "Executing Custom Input");
+            if($this->isVerboseLogging())
+                $this->getLogHandler()->log(EventType::VERBOSE, "Executing Custom Input");
             $response = new ServerResponse(json_decode($custom_input, true), $this->bot_username);
         }
         else
@@ -601,8 +610,8 @@ class Telegram
                 $offset = $this->last_update_id + 1;    //As explained in the telegram bot API documentation
             }
 
-            $this->getLogHandler()->log(EventType::VERBOSE, "Fetching from offset '$offset'");
-
+            if($this->isVerboseLogging())
+                $this->getLogHandler()->log(EventType::VERBOSE, "Fetching from offset '$offset'");
 
             $response = Request::getUpdates(
                 [
@@ -613,11 +622,13 @@ class Telegram
             );
         }
 
-        $this->getLogHandler()->log(EventType::VERBOSE, "Updates fetched OK");
+        if($this->isVerboseLogging())
+            $this->getLogHandler()->log(EventType::VERBOSE, "Updates fetched OK");
 
         if ($response->isOk()) {
 
-            $this->getLogHandler()->log(EventType::VERBOSE, "Response OK, pushing to workers");
+            if($this->isVerboseLogging())
+                $this->getLogHandler()->log(EventType::VERBOSE, "Response OK, pushing to workers");
 
             $results = $response->getResult();
 
@@ -626,13 +637,16 @@ class Telegram
             {
                 $latest_update = $results[(count($results) - 1)];
                 $this->last_update_id = $latest_update->getUpdateId();
-                $this->getLogHandler()->log(EventType::VERBOSE, "Setting offset '" . $this->last_update_id . "'");
+
+                if($this->isVerboseLogging())
+                    $this->getLogHandler()->log(EventType::VERBOSE, "Setting offset '" . $this->last_update_id . "'");
 
             }
         }
         else
         {
-            $this->getLogHandler()->log(EventType::WARNING, "Response NOT OK, pushing to workers");
+            if($this->isVerboseLogging())
+                $this->getLogHandler()->log(EventType::WARNING, "Response NOT OK, pushing to workers");
         }
 
         // Send the updates to be processed in the background by a worker immediately
@@ -640,7 +654,8 @@ class Telegram
             $this->bot_username . "_updates",  $response->toJson()
         );
 
-        $this->getLogHandler()->log(EventType::VERBOSE, "OK, Job pushed to workers.");
+        if($this->isVerboseLogging())
+            $this->getLogHandler()->log(EventType::VERBOSE, "OK, Job pushed to workers.");
 
         return $response;
     }
@@ -1413,7 +1428,7 @@ class Telegram
 
     /**
      * Returns the redis client
-     * 
+     *
      * @return RedisClient
      */
     public function getRedis()
@@ -1423,11 +1438,28 @@ class Telegram
 
     /**
      * Returns whether or not the bot is connecting to the test servers or not
-     * 
+     *
      * @return bool
      */
     public function getTestServer()
     {
         return $this->testServers;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isVerboseLogging(): bool
+    {
+        return $this->verbose_logging;
+    }
+
+    /**
+     * @param bool $verbose_logging
+     */
+    public function setVerboseLogging(bool $verbose_logging): void
+    {
+        $this->verbose_logging = $verbose_logging;
+        TelegramLog::setVerboseLogging($verbose_logging);
     }
 }
