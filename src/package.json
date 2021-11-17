@@ -2,7 +2,7 @@
     "package": {
         "package_name": "net.intellivoid.tdlib",
         "name": "Telegram Database Library for Bots",
-        "version": "1.0.1.1",
+        "version": "1.0.1.2",
         "author": "Zi Xing Narrakas",
         "organization": "Intellivoid Technologies",
         "description": "Allows bot clients to communicate with the Telegram Bot API server",
