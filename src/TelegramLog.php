@@ -73,7 +73,12 @@ class TelegramLog
      */
     public static $remove_bot_token = true;
 
-
+    /**
+     * Indicates if verbose logging is enabled or not
+     *
+     * @var bool
+     */
+    public static $verbose_logging = false;
 
     /**
      * Initialise logging.
@@ -83,7 +88,7 @@ class TelegramLog
      */
     public static function initialize(LoggerInterface $logger = null, LoggerInterface $update_logger = null): void
     {
-        self::$verbose_adventure = new VerboseAdventure("tdlib");
+        self::$verbose_adventure = new VerboseAdventure('tdlib');
         self::$logger        = $logger ?: new NullLogger();
         self::$update_logger = $update_logger ?: new NullLogger();
     }
@@ -161,7 +166,8 @@ class TelegramLog
             self::$verbose_adventure = new VerboseAdventure("tdlib");
 
         // Log to VerboseAdventure
-        self::$verbose_adventure->log($vlevel, $arguments[0]);
+        if(self::isVerboseLogging())
+            self::$verbose_adventure->log($vlevel, $arguments[0]);
 
         if (in_array($name, ['emergency', 'alert', 'critical', 'error', 'warning', 'notice', 'info', 'debug',], true)) {
             $logger = self::$logger;
@@ -201,5 +207,21 @@ class TelegramLog
 
         // Interpolate replacement values into the message and return.
         return strtr($message, $replace);
+    }
+
+    /**
+     * @return bool
+     */
+    public static function isVerboseLogging(): bool
+    {
+        return self::$verbose_logging;
+    }
+
+    /**
+     * @param bool $verbose_logging
+     */
+    public static function setVerboseLogging(bool $verbose_logging): void
+    {
+        self::$verbose_logging = $verbose_logging;
     }
 }
