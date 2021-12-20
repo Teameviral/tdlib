@@ -32,6 +32,6 @@ jobs:
       - name: Prepare Telegram Database Library for Bots
         run: ppm --generate-package="src"
       - name: Compile Telegram Database Library for Bots
-        run: ppm --no-intro --verbose --compile="src" --directory="build"
+        run: ppm --no-intro --verbose --compile="src" --directory="build" --cwarning
       - name: Install Telegram Database Library for Bots
         run: sudo -H ppm --no-prompt --fix-conflict --verbose --install="build/net.intellivoid.tdlib.ppm"
