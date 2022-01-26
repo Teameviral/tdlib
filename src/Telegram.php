@@ -757,7 +757,7 @@ class Telegram
             $type    = $message->getType();
 
             // Let's check if the message object has the type field we're looking for...
-            $command_tmp = $type === 'command' ? $message->getCommand(self::getCommandPrefix()) : $this->getCommandFromType($type);
+            $command_tmp = $type === 'command' ? $message->getCommand($this->getCommandPrefix()) : $this->getCommandFromType($type);
             // ...and if a fitting command class is available.
             $command_obj = $command_tmp ? $this->getCommandObject($command_tmp) : null;
 
@@ -1358,7 +1358,7 @@ class Telegram
             // Refresh commands list for new Update object.
             $this->commands_objects = $this->getCommandsList();
 
-            $responses[] = $this->executeCommand($this->update->getMessage()->getCommand(self::getCommandPrefix()));
+            $responses[] = $this->executeCommand($this->update->getMessage()->getCommand($this->getCommandPrefix()));
         }
 
         // Reset Update to initial context.
