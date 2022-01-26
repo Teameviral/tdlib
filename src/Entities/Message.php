@@ -153,16 +153,25 @@ class Message extends Entity
      *
      * @return string|null
      */
-    public function getCommand(): ?string
+    public function getCommand(array $prefix=['/']): ?string
     {
         if ($command = $this->getProperty('command')) {
             return $command;
         }
 
         $full_command = $this->getFullCommand() ?? '';
-        if (strpos($full_command, '/') !== 0) {
-            return null;
+        $prefix_detected = false;
+        foreach($prefix as $command_prefix)
+        {
+            if (strpos($full_command, $command_prefix) == 0)
+            {
+                $prefix_detected =  true;
+            }
         }
+
+        if($prefix_detected == false)
+            return null;
+
         $full_command = substr($full_command, 1);
 
         //check if command is followed by bot username

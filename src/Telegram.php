@@ -227,6 +227,13 @@ class Telegram
     private $verbose_logging = false;
 
     /**
+     * An array of possible command prefixes
+     *
+     * @var string[]
+     */
+    private $command_prefix = ['/'];
+
+    /**
      * Telegram constructor.
      *
      * @param string $api_key
@@ -750,7 +757,7 @@ class Telegram
             $type    = $message->getType();
 
             // Let's check if the message object has the type field we're looking for...
-            $command_tmp = $type === 'command' ? $message->getCommand() : $this->getCommandFromType($type);
+            $command_tmp = $type === 'command' ? $message->getCommand(self::getCommandPrefix()) : $this->getCommandFromType($type);
             // ...and if a fitting command class is available.
             $command_obj = $command_tmp ? $this->getCommandObject($command_tmp) : null;
 
@@ -1351,7 +1358,7 @@ class Telegram
             // Refresh commands list for new Update object.
             $this->commands_objects = $this->getCommandsList();
 
-            $responses[] = $this->executeCommand($this->update->getMessage()->getCommand());
+            $responses[] = $this->executeCommand($this->update->getMessage()->getCommand(self::getCommandPrefix()));
         }
 
         // Reset Update to initial context.
@@ -1461,5 +1468,21 @@ class Telegram
     {
         $this->verbose_logging = $verbose_logging;
         TelegramLog::setVerboseLogging($verbose_logging);
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getCommandPrefix(): array
+    {
+        return $this->command_prefix;
+    }
+
+    /**
+     * @param string[] $command_prefix
+     */
+    public function setCommandPrefix(array $command_prefix): void
+    {
+        $this->command_prefix = $command_prefix;
     }
 }
