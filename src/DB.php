@@ -60,6 +60,13 @@ class DB
     protected static $telegram;
 
     /**
+     * The encoding used
+     *
+     * @var string
+     */
+    protected static $encoding;
+
+    /**
      * Initialize
      *
      * @param array    $credentials  Database connection details
@@ -102,10 +109,66 @@ class DB
         self::$telegram          = $telegram;
         self::$mysql_credentials = $credentials;
         self::$table_prefix      = $table_prefix;
+        self::$encoding          = $encoding;
 
         self::defineTables();
 
         return self::$pdo;
+    }
+
+    /**
+     * Disconnects from the database
+     *
+     * @return void
+     */
+    public static function disconnect()
+    {
+        self::$pdo = null;
+    }
+
+    /**
+     * Reconnects to the database
+     *
+     * @return void
+     * @throws TelegramException
+     */
+    public static function connect()
+    {
+        if (empty(self::$mysql_credentials))
+        {
+            throw new TelegramException('MySQL credentials not provided!');
+        }
+
+        if (isset(self::$mysql_credentials['unix_socket']))
+        {
+            $dsn = 'mysql:unix_socket=' . self::$mysql_credentials['unix_socket'];
+        }
+        else
+        {
+            $dsn = 'mysql:host=' . self::$mysql_credentials['host'];
+        }
+
+        $dsn .= ';dbname=' . self::$mysql_credentials['database'];
+
+        if (!empty(self::$mysql_credentials['port']))
+        {
+            $dsn .= ';port=' . self::$mysql_credentials['port'];
+        }
+
+        $options = [PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES ' . self::$encoding];
+
+        try
+        {
+            $pdo = new PDO($dsn, self::$mysql_credentials['user'], self::$mysql_credentials['password'], $options);
+            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+        }
+        catch (PDOException $e)
+        {
+            throw new TelegramException($e->getMessage());
+        }
+
+        self::$pdo = $pdo;
+
     }
 
     /**
@@ -459,7 +522,7 @@ class DB
                 // Add the update ID to a set
                 $redis->lPush('telegram_update_ids', $update_id);
             }
-            
+
             // Sort the set now instead of later.
             $redis->sort('telegram_update_ids');
             // Actually add the update to redis
